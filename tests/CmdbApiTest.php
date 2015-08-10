@@ -13,7 +13,6 @@ require_once dirname(dirname(__FILE__)) . '/models/IpManager.php';
 class CmdbApiTest extends PHPUnit_Framework_TestCase {
 
     public static function setUpBeforeClass() {
-        system('source refresh_db.sh');
     }
 
     public function testIpManager_Rent_IPs() {

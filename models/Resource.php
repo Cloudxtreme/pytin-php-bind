@@ -4,11 +4,8 @@ require_once(dirname(dirname(__FILE__)) . '/lib/ParametersWrapper.php');
 require_once(dirname(dirname(__FILE__)) . '/lib/Httpful/Bootstrap.php');
 
 class Resource extends ParametersWrapper {
-    const API_URL = 'http://zabbix.justhost.ru:8018/v1';
-    const API_KEY = '623b26d278774db885593c2e098dd416ca6a9e67';
-
-//    const API_URL = 'http://127.0.0.1:8000/v1';
-//    const API_KEY = 'sdkjflskdfsdflsjd';
+    const API_URL = 'http://127.0.0.1:8000/v1';
+    const API_KEY = 'sdkjflskdfsdflsjd';
 
     public static function makeRequest($method, $uri, $many = false, $payload = array()) {
         if (empty($method)) {
