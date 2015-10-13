@@ -2,6 +2,34 @@
 
 namespace Httpful;
 
+if (!function_exists('require_once_recursive')) {
+    function require_once_recursive($rootDir) {
+        $hDir = opendir($rootDir);
+        if ($hDir === false) {
+            throw new InvalidArgumentException('rootDir');
+        }
+
+        while (($file = readdir($hDir)) !== false) {
+            if (in_array($file, array('.', '..'))) {
+                continue;
+            }
+
+            $filePath = "$rootDir/$file";
+            $endsWith = strrpos($file, '.php') === strlen($file) - strlen('.php');
+
+            if ($endsWith) {
+                require_once $filePath;
+            } else if (is_dir($filePath)) {
+                require_once_recursive($filePath);
+            }
+        }
+
+        if ($hDir) {
+            closedir($hDir);
+        }
+    }
+}
+
 require_once_recursive(dirname(__FILE__) . '/Exception');
 require_once(dirname(__FILE__) . '/Handlers/MimeHandlerAdapter.php');
 require_once_recursive(dirname(__FILE__) . '/Handlers');

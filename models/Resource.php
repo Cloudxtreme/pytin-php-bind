@@ -1,20 +1,32 @@
 <?php
 
+namespace pytin;
+
 require_once(dirname(dirname(__FILE__)) . '/lib/ParametersWrapper.php');
 require_once(dirname(dirname(__FILE__)) . '/lib/Httpful/Bootstrap.php');
 
-class Resource extends ParametersWrapper {
-    const API_URL = 'http://127.0.0.1:8000/v1';
+class Resource extends \ParametersWrapper {
+    const API_URL = 'http://127.0.0.1:8080/v1';
     const API_KEY = 'sdkjflskdfsdflsjd';
+
+    public static function get($id) {
+        if ($id <= 0) {
+            throw new \InvalidArgumentException('id');
+        }
+
+        return self::fromArray(self::makeRequest(\Httpful\Http::GET, "/{resource}/$id/"));
+    }
 
     public static function makeRequest($method, $uri, $many = false, $payload = array()) {
         if (empty($method)) {
-            throw new InvalidArgumentException('method');
+            throw new \InvalidArgumentException('method');
         }
 
         if (empty($uri)) {
-            throw new InvalidArgumentException('uri');
+            throw new \InvalidArgumentException('uri');
         }
+
+        $uri = str_replace('{resource}', self::getResourceName(), $uri);
 
         $request = \Httpful\Request::init($method)
             ->uri(self::API_URL . $uri)
@@ -34,9 +46,14 @@ class Resource extends ParametersWrapper {
         $response = $request->send();
 
         if ($response->code >= 500) {
-            throw new Exception("{$response->code}: Internal server error");
+
+            throw new \Exception("{$response->code}: Internal server error");
         } else if ($response->code >= 400) {
-            throw new Exception("{$response->code}: {$response->body->detail}");
+//            print_r($response);
+
+            $details = is_object($response->body) ? print_r($response->body, true) : 'Check server logs.';
+
+            throw new \Exception("{$response->code}: {$details}", $response->code);
         }
 
         if ($many) {
@@ -51,17 +68,17 @@ class Resource extends ParametersWrapper {
         }
     }
 
-    public static function get($id) {
-        if ($id <= 0) {
-            throw new InvalidArgumentException('id');
-        }
-
-        return self::internalFromArray(self::makeRequest(\Httpful\Http::GET, "/resources/$id/"));
+    /**
+     * Resource name is made of file name. If file is api_resource.php, then function returns api_resource.
+     * @return string Rource name for the API calls.
+     */
+    private static function getResourceName() {
+        return 'resources';
     }
 
     public static function filter($query = array()) {
         $resources = array();
-        foreach (self::makeRequest(\Httpful\Http::GET, "/resources/", true, $query) as $res_array) {
+        foreach (self::makeRequest(\Httpful\Http::GET, "/{resource}/", true, $query) as $res_array) {
             $resources[] = self::internalFromArray($res_array);
         }
 
@@ -73,7 +90,7 @@ class Resource extends ParametersWrapper {
     }
 
     public function delete() {
-        self::makeRequest(\Httpful\Http::DELETE, "/resources/$this->id/");
+        self::makeRequest(\Httpful\Http::DELETE, "/{resource}/$this->id/");
     }
 
     public function setOption($name, $value) {
@@ -99,10 +116,6 @@ class Resource extends ParametersWrapper {
         return $default;
     }
 
-    public function isSaved() {
-        return isset($this->id) && $this->id > 0;
-    }
-
     public function save() {
         if ($this->isSaved()) {
             $payload = array();
@@ -119,10 +132,14 @@ class Resource extends ParametersWrapper {
             }
 
             if (!empty($payload)) {
-                $this->setData(self::makeRequest(\Httpful\Http::PUT, "/resources/$this->id/", false, $payload));
+                $this->setData(self::makeRequest(\Httpful\Http::PATCH, "/{resource}/$this->id/", false, $payload));
             }
         } else {
-            $this->setData(self::makeRequest(\Httpful\Http::POST, "/resources/", false, $this->getAsMap()));
+            $this->setData(self::makeRequest(\Httpful\Http::POST, "/{resource}/", false, $this->getAsMap()));
         }
+    }
+
+    public function isSaved() {
+        return isset($this->id) && $this->id > 0;
     }
 }

@@ -4,11 +4,15 @@
  * (c) Dmitry Shilyaev
  *
  * Using tests
- *      Start development CMDB server: ./manage.py runserver
+ *      Start development CMDB server:
+ *
+ *      remove DB
+ *      ./manage.py migrate
+ *      ./manage.py runserver
  */
 
-require_once dirname(dirname(__FILE__)) . '/models/Resource.php';
-require_once dirname(dirname(__FILE__)) . '/models/IpManager.php';
+require_once dirname(dirname(__FILE__)) . '/models/resource.php';
+require_once dirname(dirname(__FILE__)) . '/models/ip_manager.php';
 
 class CmdbApiTest extends PHPUnit_Framework_TestCase {
 
@@ -16,7 +20,7 @@ class CmdbApiTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testIpManager_Rent_IPs() {
-        $resource1 = new Resource(array(
+        $resource1 = new pytin\Resource(array(
             'type' => 'ipman.IPNetworkPool',
             'status' => 'free',
             'options' => array(
@@ -28,7 +32,7 @@ class CmdbApiTest extends PHPUnit_Framework_TestCase {
         ));
         $resource1->save();
 
-        $resource2 = new Resource(array(
+        $resource2 = new pytin\Resource(array(
             'type' => 'ipman.IPNetworkPool',
             'status' => 'free',
             'options' => array(
@@ -40,17 +44,17 @@ class CmdbApiTest extends PHPUnit_Framework_TestCase {
         ));
         $resource2->save();
 
-        $ip_resources = IpManager::rentIPs(array($resource1->id, $resource2->id), 3);
+        $ip_resources = pytin\IpManager::rentIPs(array($resource1->id, $resource2->id), 3);
 
         $this->assertEquals(3, count($ip_resources));
-        $this->assertEquals('192.168.1.1', $ip_resources[0]->address);
-        $this->assertEquals('192.169.1.1', $ip_resources[1]->address);
-        $this->assertEquals('192.168.1.2', $ip_resources[2]->address);
+        $this->assertEquals('192.168.1.2', $ip_resources[0]->address);
+        $this->assertEquals('192.169.1.2', $ip_resources[1]->address);
+        $this->assertEquals('192.168.1.3', $ip_resources[2]->address);
     }
 
     public function testResourceAddEditDelete() {
         // Create resource
-        $resource = new Resource(array(
+        $resource = new pytin\Resource(array(
             'name' => 'This is a test resource',
             'type' => 'ipman.IPAddress',
             'status' => 'free',
@@ -93,7 +97,7 @@ class CmdbApiTest extends PHPUnit_Framework_TestCase {
         $resource->delete();
 
         try {
-            $resource = Resource::get($resource->id);
+            $resource = pytin\Resource::get($resource->id);
             print_r($resource);
             $this->fail("Exception expected.");
         } catch (Exception $ex) {
@@ -102,7 +106,7 @@ class CmdbApiTest extends PHPUnit_Framework_TestCase {
 
     public function testResourceGet() {
         // Create resource
-        $resource = new Resource(array(
+        $resource = new pytin\Resource(array(
             'name' => 'Test getter',
             'type' => 'ipman.IPAddress',
             'status' => 'inuse',
@@ -116,7 +120,7 @@ class CmdbApiTest extends PHPUnit_Framework_TestCase {
 
         $resource->save();
 
-        $resource = Resource::get($resource->id);
+        $resource = pytin\Resource::get($resource->id);
         $this->assertTrue($resource->id > 0);
         $this->assertEquals('Test getter', $resource->name);
         $this->assertEquals('IPAddress', $resource->type);
@@ -128,7 +132,7 @@ class CmdbApiTest extends PHPUnit_Framework_TestCase {
 
     public function testResourceFilter() {
         // Create resource
-        $resource = new Resource(array(
+        $resource = new pytin\Resource(array(
             'name' => 'Test filter 1',
             'type' => 'ipman.IPAddress',
             'status' => 'inuse',
@@ -141,7 +145,7 @@ class CmdbApiTest extends PHPUnit_Framework_TestCase {
         ));
         $resource->save();
 
-        $resource = new Resource(array(
+        $resource = new pytin\Resource(array(
             'name' => 'Test filter 2',
             'type' => 'ipman.IPAddress',
             'status' => 'free',
@@ -155,7 +159,7 @@ class CmdbApiTest extends PHPUnit_Framework_TestCase {
         $resource->save();
 
         // Search by model fields exact match
-        $resources = Resource::filter(array(
+        $resources = pytin\Resource::filter(array(
             'name' => 'Test filter 2',
             'status' => 'free',
         ));

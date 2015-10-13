@@ -8,4 +8,7 @@
  * Project: prod
  */
 
-require_once dirname(__FILE__) . '/models/IpManager.php';
+
+namespace pytin;
+
+require_once dirname(__FILE__) . '/models/ip_manager.php';
