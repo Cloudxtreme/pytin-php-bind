@@ -49,8 +49,6 @@ class Resource extends \ParametersWrapper {
 
             throw new \Exception("{$response->code}: Internal server error");
         } else if ($response->code >= 400) {
-//            print_r($response);
-
             $details = is_object($response->body) ? print_r($response->body, true) : 'Check server logs.';
 
             throw new \Exception("{$response->code}: {$details}", $response->code);

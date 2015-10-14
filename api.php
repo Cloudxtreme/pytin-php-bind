@@ -11,4 +11,7 @@
 
 namespace pytin;
 
+require_once(dirname(__FILE__) . '/lib/ParametersWrapper.php');
+require_once(dirname(__FILE__) . '/lib/Httpful/Bootstrap.php');
+
 require_once dirname(__FILE__) . '/models/ip_manager.php';
