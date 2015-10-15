@@ -19,6 +19,23 @@ class CmdbApiTest extends PHPUnit_Framework_TestCase {
     public static function setUpBeforeClass() {
     }
 
+    public function test_paged_retrieve() {
+        for ($x = 1; $x < 25; $x++) {
+            $resource1 = new pytin\Resource(array(
+                'type' => 'assets.ServerPort',
+                'status' => 'free',
+                'options' => array()
+            ));
+            $resource1->save();
+        }
+
+        $resources = pytin\Resource::filter(array(
+            'type' => 'ServerPort'
+        ));
+
+        $this->assertEquals(25, count($resources));
+    }
+
     public function testIpManager_Rent_IPs() {
         $resource1 = new pytin\Resource(array(
             'type' => 'ipman.IPNetworkPool',

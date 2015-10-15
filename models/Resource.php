@@ -34,19 +34,20 @@ class Resource extends \ParametersWrapper {
             ->addHeader('Accept', 'application/json')
             ->sendsJson();
 
-        if ($method == \Httpful\Http::GET) {
-            $query_str = http_build_query($payload, null, '&');
-            $query_str = preg_replace('/%5B(?:[0-9]|[1-9][0-9]+)%5D=/', '=', $query_str);
+        if (!empty($payload)) {
+            if ($method == \Httpful\Http::GET) {
+                $query_str = http_build_query($payload, null, '&');
+                $query_str = preg_replace('/%5B(?:[0-9]|[1-9][0-9]+)%5D=/', '=', $query_str);
 
-            $request = $request->uri($request->uri . '?' . $query_str);
-        } else if (!empty($payload)) {
-            $request = $request->body($payload);
+                $request = $request->uri($request->uri . '?' . $query_str);
+            } else if (!empty($payload)) {
+                $request = $request->body($payload);
+            }
         }
 
         $response = $request->send();
 
         if ($response->code >= 500) {
-
             throw new \Exception("{$response->code}: Internal server error");
         } else if ($response->code >= 400) {
             $details = is_object($response->body) ? print_r($response->body, true) : 'Check server logs.';
@@ -58,6 +59,14 @@ class Resource extends \ParametersWrapper {
             $resources = array();
             foreach ($response->body->results as $json_res) {
                 $resources[] = (array)$json_res;
+            }
+
+            if (isset($response->body->next)) {
+                $next_url = $response->body->next;
+                if ($next_url) {
+                    $next_url = substr($next_url, strlen(self::API_URL));
+                    $resources = array_merge($resources, self::makeRequest($method, $next_url, $many));
+                }
             }
 
             return $resources;
