@@ -19,7 +19,7 @@ class CmdbApiTest extends PHPUnit_Framework_TestCase {
     public static function setUpBeforeClass() {
     }
 
-    public function test_paged_retrieve() {
+    public function _test_paged_retrieve() {
         for ($x = 1; $x < 25; $x++) {
             $resource1 = new pytin\Resource(array(
                 'type' => 'assets.ServerPort',
@@ -33,10 +33,56 @@ class CmdbApiTest extends PHPUnit_Framework_TestCase {
             'type' => 'ServerPort'
         ));
 
-        $this->assertEquals(25, count($resources));
+        $this->assertEquals(24, count($resources));
     }
 
-    public function testIpManager_Rent_IPs() {
+    public function testIpManager_Rent_IPs_From_AddressPool() {
+        $address_pool = new pytin\Resource(array(
+            'type' => 'ipman.IPAddressPool',
+            'status' => 'free',
+            'name' => 'Address Pool',
+            'options' => array()
+        ));
+        $address_pool->save();
+
+        for ($x = 3; $x < 25; $x++) {
+            $res = new pytin\Resource(array(
+                'type' => 'ipman.IPAddress',
+                'parent' => $address_pool->id,
+                'status' => 'free',
+                'options' => array(
+                    array(
+                        'name' => 'address',
+                        'value' => '172.168.1.' . $x
+                    ),
+                )
+            ));
+            $res->save();
+        }
+
+        // Check before rent
+        $locked_ips = pytin\Resource::filter(array('type' => 'IPAddress', 'status' => 'locked', 'parent' => $address_pool->id));
+        $this->assertEquals(0, count($locked_ips));
+
+        $locked_ips = pytin\Resource::filter(array('type' => 'IPAddress', 'status' => 'free', 'parent' => $address_pool->id));
+        $this->assertEquals(22, count($locked_ips));
+
+
+        $ip_resources = pytin\IpManager::rentIPs(array($address_pool->id), 3);
+        $this->assertEquals(3, count($ip_resources));
+        $this->assertEquals('172.168.1.3', $ip_resources[0]->address);
+        $this->assertEquals('172.168.1.4', $ip_resources[1]->address);
+        $this->assertEquals('172.168.1.5', $ip_resources[2]->address);
+
+        // Check after rent
+        $locked_ips = pytin\Resource::filter(array('type' => 'IPAddress', 'status' => 'locked'));
+        $this->assertEquals(3, count($locked_ips));
+
+        $locked_ips = pytin\Resource::filter(array('type' => 'IPAddress', 'status' => 'free'));
+        $this->assertEquals(19, count($locked_ips));
+    }
+
+    public function testIpManager_Rent_IPs_From_NetworkPool() {
         $resource1 = new pytin\Resource(array(
             'type' => 'ipman.IPNetworkPool',
             'status' => 'free',

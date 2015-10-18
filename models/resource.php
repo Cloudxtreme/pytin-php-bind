@@ -2,9 +2,6 @@
 
 namespace pytin;
 
-require_once(dirname(dirname(__FILE__)) . '/lib/ParametersWrapper.php');
-require_once(dirname(dirname(__FILE__)) . '/lib/Httpful/Bootstrap.php');
-
 class Resource extends \ParametersWrapper {
     const API_URL = 'http://127.0.0.1:8080/v1';
     const API_KEY = 'sdkjflskdfsdflsjd';
@@ -40,7 +37,7 @@ class Resource extends \ParametersWrapper {
                 $query_str = preg_replace('/%5B(?:[0-9]|[1-9][0-9]+)%5D=/', '=', $query_str);
 
                 $request = $request->uri($request->uri . '?' . $query_str);
-            } else if (!empty($payload)) {
+            } else {
                 $request = $request->body($payload);
             }
         }
