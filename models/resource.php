@@ -99,11 +99,21 @@ class Resource extends \ParametersWrapper {
 
     public function setOption($name, $value) {
         $options = $this->options;
+
+        $new_option = true;
         foreach ($options as $option) {
             if ($option->name == $name) {
                 $option->value = $value;
+                $new_option = false;
                 break;
             }
+        }
+
+        if ($new_option) {
+            $options[] = array(
+                'name' => $name,
+                'value' => $value
+            );
         }
 
         $this->options = null;
