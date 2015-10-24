@@ -74,10 +74,16 @@ class Resource extends \ParametersWrapper {
 
     /**
      * Resource name is made of file name. If file is api_resource.php, then function returns api_resource.
-     * @return string Rource name for the API calls.
+     * @return string Resource name for the API calls.
      */
-    private static function getResourceName() {
-        return 'resources';
+    public static function getResourceName() {
+        $call_class = get_called_class();
+
+        if (substr($call_class, -8) == 'Resource') {
+            return 'resources';
+        }
+
+        return $call_class::getResourceName();
     }
 
     public static function filter($query = array()) {
