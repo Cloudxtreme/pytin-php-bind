@@ -13,6 +13,10 @@ namespace pytin;
 require_once 'resource.php';
 
 class IpManager extends Resource {
+    public static function getResourceName() {
+        return 'ipman';
+    }
+
     public static function rentIPs($pool_ids = array(), $count = 1) {
         if (empty($pool_ids)) {
             throw new \InvalidArgumentException('pool_ids');
