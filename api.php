@@ -15,3 +15,5 @@ require_once(dirname(__FILE__) . '/lib/ParametersWrapper.php');
 require_once(dirname(__FILE__) . '/lib/Httpful/Bootstrap.php');
 
 require_once dirname(__FILE__) . '/models/ip_manager.php';
+require_once dirname(__FILE__) . '/models/vps_control.php';
+require_once dirname(__FILE__) . '/models/cloud_tasks.php';

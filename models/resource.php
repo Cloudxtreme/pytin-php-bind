@@ -3,7 +3,7 @@
 namespace pytin;
 
 class Resource extends \ParametersWrapper {
-    const API_URL = 'http://127.0.0.1:8080/v1';
+    const API_URL = 'http://127.0.0.1:8000/v1';
     const API_KEY = 'sdkjflskdfsdflsjd';
 
     public static function get($id) {
@@ -45,7 +45,7 @@ class Resource extends \ParametersWrapper {
         $response = $request->send();
 
         if ($response->code >= 500) {
-            throw new \Exception("{$response->code}: Internal server error");
+            throw new \Exception("{$response->code}: Internal server error. Check server logs.");
         } else if ($response->code >= 400) {
             $details = is_object($response->body) ? print_r($response->body, true) : 'Check server logs.';
 
